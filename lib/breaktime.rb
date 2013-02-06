@@ -29,5 +29,3 @@ module Breaktime
   end
 
 end
-
-exit 3
