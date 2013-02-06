@@ -5,27 +5,34 @@ module Breaktime
   require 'rubygems'
   require 'bundler/setup'
   require 'version'
-  require 'main'
+  require 'exec_self'
+  require 'trollop'
 
-  Main do
-    def run
-      require 'schedule'
-    end
-
-    mode 'config' do
-      def run() puts 'config!' end
-    end
-
-    mode 'dialog' do
-      def run
-        require 'dialog'
-      end
-    end
-
-    mode 'now' do
-      def run() puts 'now!' end
-    end
-
+  SUB_COMMANDS = %w(dialog now)
+  global_opts = Trollop::options do
+    banner "Give your eyes scheduled screen breaks"
+    opt :dry_run, "Nah", :short => '-n'
+    stop_on SUB_COMMANDS
   end
 
+  puts global_opts.inspect
+
+  puts ARGV
+  cmd = ARGV.shift # get the subcommand
+  cmd_opts = case cmd
+  when "dialog" # parse delete options
+    Trollop::options do
+      #opt :force, "Force deletion"
+    end
+  when "now"  # 
+    Trollop::options do
+      #opt :double, "Copy twice for safety's sake"
+    end
+  when nil
+    # Main program
+  else
+    Trollop::die "unknown subcommand #{cmd.inspect}"
+  end
+
+  puts cmd_opts.inspect
 end

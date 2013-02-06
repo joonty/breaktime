@@ -4,5 +4,5 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'green_shoes', :git => 'https://github.com/ashbb/green_shoes.git'
-gem 'main'
+gem 'trollop'
 gem 'rufus-scheduler'
