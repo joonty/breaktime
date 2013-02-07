@@ -7,32 +7,43 @@ module Breaktime
   require 'version'
   require 'exec_self'
   require 'trollop'
+  require 'yaml'
+  require 'command'
+
+  default_config = ENV['HOME'] + File::SEPARATOR + ".breaktime.yml"
 
   SUB_COMMANDS = %w(dialog now)
-  global_opts = Trollop::options do
+  opts = Trollop::options do
     banner "Give your eyes scheduled screen breaks"
-    opt :dry_run, "Nah", :short => '-n'
+    opt :config, "Configuration yaml file", :short => '-c', :default => default_config
     stop_on SUB_COMMANDS
   end
 
-  puts global_opts.inspect
-
-  puts ARGV
-  cmd = ARGV.shift # get the subcommand
-  cmd_opts = case cmd
-  when "dialog" # parse delete options
-    Trollop::options do
-      #opt :force, "Force deletion"
+  options = {'interval' => 60,
+             'days' => ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']}
+  if File.exist? opts[:config]
+    begin
+      options.merge! YAML.load_file(opts[:config])
+    rescue => e
+      puts e.message
+      Trollop::die :config, "must be a valid yaml file"
     end
-  when "now"  # 
-    Trollop::options do
-      #opt :double, "Copy twice for safety's sake"
-    end
-  when nil
-    # Main program
-  else
-    Trollop::die "unknown subcommand #{cmd.inspect}"
   end
+  command = Breaktime::Command.new options['command']
 
-  puts cmd_opts.inspect
+  subcmd = ARGV.shift # get the subcommand
+
+  case subcmd
+  when "dialog"
+    require 'dialog'
+  when "now"
+    command.execute
+  when nil
+    require 'schedule'
+    schedule = Schedule.new options
+    schedule.start
+
+  else
+    Trollop::die "unknown subcommand #{subcmd.inspect}"
+  end
 end
