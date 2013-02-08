@@ -6,3 +6,4 @@ gemspec
 gem 'green_shoes', :git => 'https://github.com/ashbb/green_shoes.git'
 gem 'trollop'
 gem 'rufus-scheduler'
+gem 'log4r'
