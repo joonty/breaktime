@@ -1,6 +1,8 @@
 class Breaktime::Command
   class CommandNotKnown < StandardError; end
 
+  attr_reader :command
+
   def self.system_default
     case RbConfig::CONFIG['target_os']
     when 'linux'

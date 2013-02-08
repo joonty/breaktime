@@ -1,8 +1,12 @@
 require 'trollop'
 require 'yaml'
+require 'log4r'
 
 class Breaktime::Main
-  attr_reader :options, :cli_options, :mode
+  
+  include Log4r
+
+  attr_reader :options, :cli_options, :mode, :log
 
   DEFAULT_OPTIONS = {'interval' => 60,
                      'days' => ['monday',
@@ -18,29 +22,65 @@ class Breaktime::Main
 
   def initialize
     @options = DEFAULT_OPTIONS
-    @cli_options = Trollop::options do
-      banner "Give your eyes scheduled screen breaks"
 
-      opt :config, 
-          "Configuration yaml file", 
-          :short => '-c', 
-          :default => DEFAULT_CONFIG
+    @cli_options = parse_cli_options
 
-      stop_on SUB_COMMANDS
-    end
+    @log = create_logger(@cli_options[:debug])
+
     parse_yaml_file
-    @mode = ARGV.shift
+
+    @mode = ARGV.shift || 'default'
   end
 
   def die(message)
     Trollop::die message
   end
 
+  def logger
+  end
+
   private
-  def default_config_file
+
+  def create_logger(level)
+    log = Logger.new 'breaktime'
+    outputter = Outputter.stdout
+    outputter.formatter = PatternFormatter.new(:pattern => "%l\t%m")
+    log.outputters << outputter
+    log.level = self.class.const_get(level.upcase)
+    log
+  end
+
+  def parse_cli_options
+    Trollop::options do
+      banner <<-BAN
+NAME
+  breaktime
+
+SYNOPSIS
+  breaktime (dialog|now) [options]+
+
+DESCRIPTION
+  Give your eyes scheduled screen breaks
+
+PARAMETERS
+BAN
+
+      opt :config, 
+          "Configuration yaml file", 
+          :short => '-c', 
+          :default => DEFAULT_CONFIG
+
+      opt :debug, 
+          "Output level = (debug|info|warn|error|fatal)", 
+          :short => '-v', 
+          :default => 'info'
+
+      stop_on SUB_COMMANDS
+    end
   end
 
   def parse_yaml_file
+    @log.debug { "Configuration yaml file: #{@cli_options[:config]}" }
     if File.exist? @cli_options[:config]
       begin
         @options.merge! YAML.load_file(@cli_options[:config])
@@ -48,6 +88,10 @@ class Breaktime::Main
         puts e.message
         Trollop::die :config, "must be a valid yaml file"
       end
+    elsif @cli_options[:config] != DEFAULT_CONFIG
+      Trollop::die :config, "must be a valid yaml file"
+    else
+      @log.info { "No configuration file found, using defaults" }
     end
   end
   
