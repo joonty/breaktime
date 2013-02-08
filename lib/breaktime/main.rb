@@ -25,7 +25,7 @@ class Breaktime::Main
 
     @cli_options = parse_cli_options
 
-    @log = create_logger(@cli_options[:debug])
+    @log = create_logger(@cli_options[:level])
 
     parse_yaml_file
 
@@ -70,9 +70,9 @@ BAN
           :short => '-c', 
           :default => DEFAULT_CONFIG
 
-      opt :debug, 
+      opt :level, 
           "Output level = (debug|info|warn|error|fatal)", 
-          :short => '-v', 
+          :short => '-l', 
           :default => 'info'
 
       stop_on SUB_COMMANDS
