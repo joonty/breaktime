@@ -25,7 +25,12 @@ class Breaktime::Command
   end
 
   def initialize(command, log)
-    @command = (command.nil?) ? self.class.system_default(log) : command
+    @command = if command.nil?
+      self.class.system_default(log)
+    else
+      log.debug { "User defined command: #{command}" }
+      command
+    end
   end
 
   def execute

@@ -21,11 +21,12 @@ class Breaktime::Main
   DEFAULT_CONFIG = ENV['HOME'] + File::SEPARATOR + ".breaktime.yml"
 
   def initialize
+    @log = create_logger('error')
     @options = DEFAULT_OPTIONS
 
     @cli_options = parse_cli_options
 
-    @log = create_logger(@cli_options[:level])
+    set_log_level @cli_options[:level]
 
     parse_yaml_file
 
@@ -48,8 +49,12 @@ class Breaktime::Main
     outputter = Outputter.stdout
     outputter.formatter = PatternFormatter.new(:pattern => "%l\t%m")
     log.outputters << outputter
-    log.level = self.class.const_get(level.upcase)
+    log.level = ERROR
     log
+  end
+
+  def set_log_level(level)
+    @log.level = self.class.const_get(level.upcase)
   end
 
   def parse_cli_options
@@ -86,8 +91,8 @@ BAN
     if File.exist? @cli_options[:config]
       begin
         @options.merge! YAML.load_file(@cli_options[:config])
-      rescue => e
-        puts e.message
+      rescue Exception => e
+        @log.debug { e.message }
         Trollop::die :config, "must be a valid yaml file"
       end
     elsif @cli_options[:config] != DEFAULT_CONFIG
