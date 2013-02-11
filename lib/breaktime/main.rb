@@ -36,6 +36,11 @@ class Breaktime::Main
     Trollop::die message
   end
 
+  def say_goodbye(exit_code)
+    puts "\n\"Have a break, have a generic chocolate snack.\""
+    exit exit_code
+  end
+
   private
 
   def create_logger(level)

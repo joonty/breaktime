@@ -10,12 +10,12 @@ module Breaktime
       @sent = para str % seconds
 
       button "Cancel" do
-        exit 1
+        exit Breaktime::EX_BREAK_CANCELLED
       end
 
       every 1 do |i|
         if i >= seconds
-          exit 0
+          exit Breaktime::EX_OK
         else
           @sent.text = str % (seconds - i)
         end
