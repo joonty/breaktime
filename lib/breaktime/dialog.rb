@@ -1,6 +1,11 @@
 require 'green_shoes'
 
 module Breaktime
+  # The shoes GUI app for notifying the user about their imminent breaktime.
+  #
+  # They have 10 seconds to cancel the break. If they cancel the process exits
+  # with EX_BREAK_CANCELLED, otherwise EX_OK. This is used by calling processes
+  # to determine what to do.
   Shoes.app :height => 60, :width => 380, :title => 'Take a break!' do
     seconds = 10
     str = "Take a break! You have %d seconds to cancel."

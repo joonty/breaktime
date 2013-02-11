@@ -1,5 +1,8 @@
 require 'rufus/scheduler'
 
+# Schedule the running of the breaktime dialog and screensaver.
+#
+# Uses rufus-scheduler to schedule the task running.
 class Breaktime::Schedule
   def initialize(interval, days, cli_options, log)
     @interval = interval.to_s + 'm'
@@ -8,6 +11,12 @@ class Breaktime::Schedule
     @log = log
   end
 
+  # Start the scheduler to run at a given interval.
+  #
+  # The interval (60 minutes by default) can be set in the configuration YAML
+  # file. The days at which breaktime runs can also be set.
+  #
+  # When it's time to run, `run_dialog()` is called.
   def start
     scheduler = Rufus::Scheduler.start_new
 
@@ -28,6 +37,17 @@ class Breaktime::Schedule
   end
 
   private
+  # Open the countdown dialog, showing the user their break is about to start.
+  #
+  # Only if the process returns the EX_OK status code will the screensaver
+  # command run.
+  #
+  # This calls `exec_self()`, which runs same process name as the current
+  # command, but runs it as a `system()` call. It passes the same CLI arguments
+  # as those passed by the user.
+  #
+  # The process is forked at this point, and detatched from the parent, so the
+  # scheduling continues uninterrupted.
   def run_dialog
     if (pid = fork)
       Process.detach(pid)
@@ -49,6 +69,9 @@ class Breaktime::Schedule
     end
   end
 
+  # Execute the breaktime command with a given mode and CLI arguments.
+  #
+  # The exit code is returned.
   def exec_self(mode, args = {})
     arg_str = ''
     @cli_options.merge(args).each do |n,v|
