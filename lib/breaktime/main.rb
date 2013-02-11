@@ -1,6 +1,8 @@
 require 'trollop'
 require 'yaml'
 require 'log4r'
+require 'schedule'
+require 'dante'
 
 class Breaktime::Main
   
@@ -9,6 +11,9 @@ class Breaktime::Main
   attr_reader :options, :cli_options, :mode, :log
 
   DEFAULT_OPTIONS = {'interval' => 60,
+                     'pid_path' => ENV['HOME'] + File::SEPARATOR + "breaktime.pid",
+                     'log_path' => ENV['HOME'] + File::SEPARATOR + "breaktime.log",
+                     'daemonize' => true,
                      'days' => ['monday',
                                 'tuesday',
                                 'wednesday',
@@ -17,7 +22,7 @@ class Breaktime::Main
                                 'saturday',
                                 'sunday']}
 
-  SUB_COMMANDS = %w(dialog now)
+  SUB_COMMANDS = %w(start stop dialog now)
   DEFAULT_CONFIG = ENV['HOME'] + File::SEPARATOR + ".breaktime.yml"
 
   def initialize
@@ -30,7 +35,7 @@ class Breaktime::Main
 
     parse_yaml_file
 
-    @mode = ARGV.shift || 'default'
+    @mode = ARGV.shift || 'start'
   end
 
   def die(message)
@@ -40,6 +45,29 @@ class Breaktime::Main
   def say_goodbye(exit_code)
     puts "\n\"Have a break, have a generic chocolate snack.\""
     exit exit_code
+  end
+
+  def startd
+    dante_opts = {:daemonize => @options['daemonize'], 
+                  :pid_path => @options['pid_path'], 
+                  :log_path => @options['log_path']}
+
+    if dante_opts[:daemonize]
+      @log.info { "Starting daemon, PID file => #{dante_opts[:pid_path]}, log file => #{dante_opts[:log_path]}" }
+      @log.outputters.first.formatter = PatternFormatter.new(:pattern => "[%l] %d :: %m")
+    end
+
+    schedule = Breaktime::Schedule.new(@options['interval'], @options['days'], @cli_options, @log)
+
+    Dante::Runner.new('breaktime').execute(dante_opts) do
+      schedule.start
+    end
+  end
+
+  def stopd
+    dante_opts = {:kill => true,
+                  :pid_path => @options['pid_path']}
+    Dante::Runner.new('breaktime').execute(dante_opts)
   end
 
   private
@@ -64,7 +92,7 @@ NAME
   breaktime
 
 SYNOPSIS
-  breaktime (dialog|now) [options]+
+  breaktime (#{SUB_COMMANDS.join("|")}) [options]+
 
 DESCRIPTION
   Give your eyes scheduled screen breaks

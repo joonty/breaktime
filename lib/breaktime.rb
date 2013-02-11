@@ -8,9 +8,9 @@ module Breaktime
   EX_OS_UNKNOWN = 2
   EX_LINUX_WM_UNKNOWN = 3
   EX_SIGNAL = 128
-  EX_INTERRUPT = 130
-  EX_BREAK_CANCELLED = 254
-  EX_CLI = 255
+  EX_INTERRUPT = 130 # Control-C
+  EX_BREAK_CANCELLED = 254 # Cancel from the countdown GUI
+  EX_CLI = 255 # CLI option fails
 
   require 'rubygems'
   require 'bundler/setup'
@@ -32,11 +32,14 @@ module Breaktime
     when "now"
       command.execute
 
-    when "default"
-      require 'schedule'
+    when "stop"
+      main.log.info { "Stopping breaktime background process" }
+      main.stopd
+      main.say_goodbye EX_OK
+
+    when "start"
       main.log.info { "When it's breaktime I'll run: `#{command.command}`" }
-      schedule = Schedule.new main.options, main.cli_options, main.log
-      schedule.start
+      main.startd
 
     else
       main.die "unknown mode #{main.mode.inspect}"
