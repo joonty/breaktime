@@ -36,9 +36,6 @@ class Breaktime::Main
     Trollop::die message
   end
 
-  def logger
-  end
-
   private
 
   def create_logger(level)

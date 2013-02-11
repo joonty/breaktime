@@ -1,5 +1,6 @@
+require 'linux_win_manager'
 class Breaktime::Command
-  class CommandNotKnown < StandardError; end
+  class OSUnknown < StandardError; end
 
   attr_reader :command
 
@@ -16,7 +17,7 @@ class Breaktime::Command
       'rundll32.exe user32.dll,LockWorkStation'
 
     else
-      raise CommandNotKnown, 'Unknown OS'
+      raise OSUnknown, 'Unknown OS'
     end
   end
 

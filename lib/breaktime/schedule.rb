@@ -1,7 +1,8 @@
 require 'rufus/scheduler'
 class Breaktime::Schedule
-  def initialize(config,log)
+  def initialize(config, cli_options, log)
     @interval = config['interval'].to_s + 'm'
+    @cli_options = cli_options
     @days = config['days']
     @log = log
   end
@@ -30,13 +31,26 @@ class Breaktime::Schedule
     if (pid = fork)
       Process.detach(pid)
     else 
-      system "#{$PROGRAM_NAME} dialog -l error"
+      exec_self "dialog", :level => 'error'
       if $? == 0
         @log.info { "Taking a break..." }
-        system "#{$PROGRAM_NAME} now -l error"
+        exec_self "now", :level => 'error'
       else
         @log.warn { "Cancelled screen break" }
       end
     end
   end
+
+  def exec_self(mode, args = {})
+    arg_str = ''
+    @cli_options.merge(args).each do |n,v|
+      if v
+        arg_str += " --#{n} #{v}"
+      end
+    end
+    exec_str = "#{$PROGRAM_NAME} #{mode} #{arg_str}"
+    @log.debug { "Executing `#{exec_str}`" }
+  end
+
+
 end
