@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'green_shoes', :git => 'https://github.com/ashbb/green_shoes.git'
-gem 'trollop'
-gem 'rufus-scheduler'
-gem 'log4r'
-gem 'dante'
+gem 'trollop', '~> 2.0.0'
+gem 'rufus-scheduler', '~> 2.0.17'
+gem 'log4r', '~> 1.1.10'
+gem 'dante', '~> 0.1.5'
