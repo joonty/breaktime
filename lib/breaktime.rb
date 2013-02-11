@@ -11,8 +11,8 @@ module Breaktime
 
   begin
     main = Breaktime::Main.new
-    main.log.debug { "Starting mode: #{main.mode}" }
-    command = Breaktime::Command.new main.options['command']
+    main.log.debug { "Starting cli mode: #{main.mode}" }
+    command = Breaktime::Command.new main.options['command'], main.log
 
     case main.mode
     when "dialog"
@@ -54,8 +54,8 @@ To get round this problem in the meantime, just specify a "command" in your $HOM
     end
     exit 1
   rescue Exception => e
-    log.fatal { "Unexpected exception {#{e.class.name}}: #{e.message}" }
-    log.debug { $!.backtrace.join("\n\t") }
+    main.log.fatal { "Unexpected exception {#{e.class.name}}: #{e.message}" }
+    main.log.debug { $!.backtrace.join("\n\t") }
     exit 1
   end
 end
