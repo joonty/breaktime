@@ -6,17 +6,11 @@ You can set how often it runs, what day(s) of the week it runs, and which system
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'breaktime'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
+As breaktime is a ruby gem, you need to have access to the rubygems command line tool, `gem`. If you do, installation will hopefully be as simple as:
 
     $ gem install breaktime
+
+But breaktime depends on the [green_shoes](https://github.com/ashbb/green_shoes) gem, which itself depends on gtk2. Building this gem requires native extensions, so you will need to have the right libraries to get it to install.
 
 ## Usage
 
@@ -43,7 +37,7 @@ Simply running `breaktime` on its own should work - it will run every 60 minutes
 
 If you want to do a bit more fine-tuning, create a YAML file at `$HOME/.breaktime.yml` that looks like this (everything's optional):
 
-```yaml
+```yml
 command: xscreensaver-command -a
 interval: 40
 days:
