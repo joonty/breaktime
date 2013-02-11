@@ -1,7 +1,7 @@
 require 'rufus/scheduler'
 class Breaktime::Schedule
   def initialize(config, cli_options, log)
-    @interval = config['interval'].to_s + 's'
+    @interval = config['interval'].to_s + 'm'
     @cli_options = cli_options
     @days = config['days']
     @log = log

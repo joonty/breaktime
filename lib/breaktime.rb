@@ -2,6 +2,7 @@ module Breaktime
   lib_dir = File.dirname(__FILE__) + File::SEPARATOR + 'breaktime'
   $:.unshift lib_dir
 
+  # Exit status codes
   EX_OK = 0
   EX_UNKNOWN = 1
   EX_OS_UNKNOWN = 2
