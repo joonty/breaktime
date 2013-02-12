@@ -1,14 +1,14 @@
-require 'trollop'
 require 'yaml'
 require 'log4r'
 require 'schedule'
 require 'dante'
+require 'cli'
 
 # Handles configuration options, CLI stuff and process daemonizing.
 class Breaktime::Main
   include Log4r
 
-  attr_reader :options, :cli_options, :mode, :log
+  attr_reader :options, :log, :cli
 
   # Default options that can be overridden in the YAML file.
   DEFAULT_OPTIONS = {'interval' => 60,
@@ -23,23 +23,14 @@ class Breaktime::Main
                                 'saturday',
                                 'sunday']}
 
-  # Available sub commands (modes) for CLI.
-  SUB_COMMANDS = %w(start stop dialog now)
-
-  # Default location of YAML config file.
-  DEFAULT_CONFIG = ENV['HOME'] + File::SEPARATOR + ".breaktime.yml"
-
   # Set up the logger, parse CLI options and the YAML file.
   def initialize
-    create_logger('error')
+    create_logger 'error'
+    @cli = Breaktime::CLI.new
     @options = DEFAULT_OPTIONS
-    @cli_options = parse_cli_options
-
-    set_log_level @cli_options[:level]
+    set_log_level @cli.options[:level]
 
     parse_yaml_file
-
-    @mode = ARGV.shift || 'start'
   end
 
   # Exit with a trollop message.
@@ -49,8 +40,43 @@ class Breaktime::Main
 
   # Print out the gem motto and exit with the given exit code.
   def say_goodbye(exit_code)
-    puts "\n\"Have a break, have a generic chocolate snack.\""
+    puts "\n\s\sBreaktime says, \"Have a break, have an unbranded chocolate snack.\""
     exit exit_code
+  end
+
+  # Run the given mode.
+  #
+  # The mode is one of the command line modes (run with the --help flag).
+  def run_mode(mode)
+    command = Breaktime::Command.new @options['command'], @log
+
+    # Switch on CLI mode.
+    case mode
+    # Schedule the breaktime.
+    when "start"
+      @log.info { "When it's breaktime I'll run: `#{command.command}`" }
+      startd
+
+    # Stop a currently running daemonized process.
+    when "stop"
+      @log.info { "Stopping breaktime background process" }
+      stopd
+      say_goodbye Breaktime::EX_OK
+
+    # Open a dialog to notify the user about an impending screen break.
+    when "dialog"
+      require 'dialog'
+      # Automatically loads green shoes window
+
+    # Run the command that will start the break.
+    when "now"
+      command.execute
+
+    # Unknown mode.
+    else
+      die "unknown mode #{mode.inspect}"
+
+    end
   end
 
   # Start the scheduler as a daemon.
@@ -69,10 +95,9 @@ class Breaktime::Main
 
     if dante_opts[:daemonize]
       @log.info { "Starting daemon, PID file => #{dante_opts[:pid_path]}, log file => #{dante_opts[:log_path]}" }
-      @log.outputters.first.formatter = PatternFormatter.new(:pattern => "[%l] %d :: %m")
     end
 
-    schedule = Breaktime::Schedule.new(@options['interval'], @options['days'], @cli_options, @log)
+    schedule = Breaktime::Schedule.new(@options['interval'], @options['days'], @cli.options, @log)
 
     Dante::Runner.new('breaktime').execute(dante_opts) do
       schedule.start
@@ -84,6 +109,59 @@ class Breaktime::Main
     dante_opts = {:kill => true,
                   :pid_path => @options['pid_path']}
     Dante::Runner.new('breaktime').execute(dante_opts)
+  end
+
+  class << self
+    # Create a new Main object and run the mode given as a CLI parameter.
+    #
+    # Also rescue exceptions and display helpful messages.
+    # 
+    # TODO: tidy this up
+    def start
+      main = self.new
+      main.log.debug { "Starting cli mode: #{main.cli.mode}" }
+
+      begin
+        main.run_mode main.cli.mode
+      # Exception handling and appropriate exit codes.
+      rescue Breaktime::LinuxWinManager::ManagerUnknown
+        main.log.fatal do
+          <<-FATAL
+    It looks like you're using Linux, but I'm unable to detect your window manager to determine how to start your screensaver.
+
+    To get round this problem, just specify a "command" in your $HOME/.breaktime.yml file, and this will be executed at the start of your break.
+          FATAL
+        end
+        exit Breaktime::EX_LINUX_WM_UNKNOWN
+
+      rescue Breaktime::Command::OSUnknown
+        main.log.fatal do
+          <<-FATAL
+    I can't work out which operating system you're using. If you think this is unreasonable then please let me know on Github.
+
+    To get round this problem in the meantime, just specify a "command" in your $HOME/.breaktime.yml file, and this will be executed at the start of your break.
+            FATAL
+        end
+        exit Breaktime::EX_OS_UNKNOWN
+
+      rescue Interrupt
+        main.log.warn { "Caught Control-C, shutting down..." }
+        main.say_goodbye Breaktime::EX_INTERRUPT
+
+      rescue SignalException => e
+        main.log.warn { "Caught signal #{e.message}, shutting down..." }
+        main.say_goodbye Breaktime::EX_SIGNAL
+
+      rescue SystemExit
+        raise
+
+      rescue Exception => e
+        main.log.fatal { "Unexpected exception {#{e.class.name}}: #{e.message}" }
+        main.log.debug { $!.backtrace.join("\n\t") }
+        exit Breaktime::EX_UNKNOWN
+
+      end
+    end
   end
 
   private
@@ -105,55 +183,25 @@ class Breaktime::Main
     @log.level = self.class.const_get(level.upcase)
   end
 
-  # Parse CLI options with Trollop.
-  def parse_cli_options
-    Trollop::options do
-      banner <<-BAN
-NAME
-  breaktime
-
-SYNOPSIS
-  breaktime (#{SUB_COMMANDS.join("|")}) [options]+
-
-DESCRIPTION
-  Give your eyes scheduled screen breaks
-
-PARAMETERS
-BAN
-
-      opt :config, 
-          "Configuration yaml file", 
-          :short => '-c', 
-          :default => DEFAULT_CONFIG
-
-      opt :level, 
-          "Output level = (debug|info|warn|error|fatal)", 
-          :short => '-l', 
-          :default => 'info'
-
-      stop_on SUB_COMMANDS
-    end
-  end
-
   # Parse the YAML configuration file.
   #
   # Any errors in the parsing cause the program to exit, but a YAML file is not
   # required - the defaults are used if it doesn't exist.
+  #
+  # TODO: separate into separate module/class?
   def parse_yaml_file
-    @log.debug { "Configuration yaml file: #{@cli_options[:config]}" }
-    if File.exist? @cli_options[:config]
+    @log.debug { "Configuration yaml file: #{@cli.options[:config]}" }
+    if File.exist? @cli.options[:config]
       begin
-        @options.merge! YAML.load_file(@cli_options[:config])
+        @options.merge! YAML.load_file(@cli.options[:config])
       rescue Exception => e
         @log.debug { e.message }
         Trollop::die :config, "must be a valid yaml file"
       end
-    elsif @cli_options[:config] != DEFAULT_CONFIG
+    elsif @cli.options[:config] != DEFAULT_CONFIG
       Trollop::die :config, "must be a valid yaml file"
     else
       @log.info { "No configuration file found, using defaults" }
     end
   end
-  
-
 end
