@@ -45,27 +45,20 @@ class Breaktime::Schedule
   # This calls `exec_self()`, which runs same process name as the current
   # command, but runs it as a `system()` call. It passes the same CLI arguments
   # as those passed by the user.
-  #
-  # The process is forked at this point, and detatched from the parent, so the
-  # scheduling continues uninterrupted.
   def run_dialog
-    if (pid = fork)
-      Process.detach(pid)
-    else 
-      retcode_d = exec_self "dialog", :level => 'error'
+    retcode_d = exec_self "dialog", :level => 'error'
 
-      case retcode_d
-      when Breaktime::EX_OK
-        @log.info { "Taking a break..." }
-        retcode_i = exec_self "now", :level => 'error'
-        if retcode_i != 0
-          @log.error { "Failed to run breaktime with the `now` mode" }
-        end
-      when Breaktime::EX_BREAK_CANCELLED
-        @log.warn { "Cancelled screen break" }
-      else
-        @log.error { "Failed to run breaktime with the `dialog` mode" }
+    case retcode_d
+    when Breaktime::EX_OK
+      @log.info { "Taking a break..." }
+      retcode_i = exec_self "now", :level => 'error'
+      if retcode_i != 0
+        @log.error { "Failed to run breaktime with the `now` mode" }
       end
+    when Breaktime::EX_BREAK_CANCELLED
+      @log.warn { "Cancelled screen break" }
+    else
+      @log.error { "Failed to run breaktime with the `dialog` mode" }
     end
   end
 
@@ -75,7 +68,7 @@ class Breaktime::Schedule
   def exec_self(mode, args = {})
     arg_str = ''
     @cli_options.merge(args).each do |n,v|
-      if v
+      if v && !n.to_s.include?("_given")
         arg_str += " --#{n} #{v}"
       end
     end

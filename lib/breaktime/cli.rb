@@ -14,11 +14,7 @@ class Breaktime::CLI
     @mode = ARGV.shift || 'start'
   end
 
-  # Exit with a trollop message.
-  def die(message)
-    Trollop::die message
-  end
-
+	private
   # Parse CLI options with Trollop.
   def parse_cli_options
     Trollop::options do
@@ -54,7 +50,6 @@ BAN
           :short => '-l', 
           :default => 'info'
 
-      stop_on SUB_COMMANDS
     end
   end
 end

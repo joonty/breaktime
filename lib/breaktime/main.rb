@@ -65,6 +65,7 @@ class Breaktime::Main
 
     # Open a dialog to notify the user about an impending screen break.
     when "dialog"
+			@log.info { "Opening dialog" }
       require 'dialog'
       # Automatically loads green shoes window
 
