@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.version       = Breaktime::VERSION
   gem.authors       = ["Jon Cairns"]
   gem.email         = ["jon@joncairns.com"]
-  gem.description   = %q{Enforce screen breaks at regular intervals.}
+  gem.description   = %q{Enforce screen breaks at regular intervals, when you want them}
   gem.summary       = %q{Breaktime}
   gem.homepage      = "https://github.com/joonty/breaktime"
 
