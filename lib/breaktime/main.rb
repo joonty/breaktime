@@ -199,10 +199,11 @@ class Breaktime::Main
         @log.debug { e.message }
         Trollop::die :config, "must be a valid yaml file"
       end
-    elsif @cli.options[:config] != DEFAULT_CONFIG
+    elsif @cli.options[:config] != Breaktime::CLI::DEFAULT_CONFIG
       Trollop::die :config, "must be a valid yaml file"
     else
-      @log.info { "No configuration file found, using defaults" }
+      @log.warn { "No configuration file found at #{Breaktime::CLI::DEFAULT_CONFIG}, using defaults" }
+      @log.info { "Check the README for info on creating a configuration file" }
     end
   end
 end
