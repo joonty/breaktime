@@ -16,4 +16,9 @@ Gem::Specification.new do |gem|
   gem.executables   = ['breaktime']
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib","lib/breaktime"]
+  gem.add_dependency 'green_shoes', '~> 1.1.373'
+  gem.add_dependency 'trollop', '~> 2.0.0'
+  gem.add_dependency 'rufus-scheduler', '~> 2.0.17'
+  gem.add_dependency 'log4r', '~> 1.1.10'
+  gem.add_dependency 'dante', '~> 0.1.5'
 end
