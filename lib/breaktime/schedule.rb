@@ -52,7 +52,9 @@ class Breaktime::Schedule
     when Breaktime::EX_OK
       @log.info { "Taking a break..." }
       retcode_i = exec_self "now", :level => 'error'
-      if retcode_i != 0
+      if retcode_i == 0
+        @log.info { "Command returned" }
+      else
         @log.error { "Failed to run breaktime with the `now` mode" }
       end
     when Breaktime::EX_BREAK_CANCELLED
