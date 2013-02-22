@@ -15,9 +15,7 @@ module Breaktime
   EX_BREAK_CANCELLED = 254 # Cancel from the countdown GUI
   EX_CLI = 255             # CLI option errors
 
-  require 'rubygems'
-  require 'bundler/setup'
-  require 'version'
-  require 'command'
-  require 'main'
+  require 'breaktime/version'
+  require 'breaktime/command'
+  require 'breaktime/main'
 end

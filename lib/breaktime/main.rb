@@ -1,8 +1,8 @@
 require 'yaml'
 require 'log4r'
-require 'schedule'
+require 'breaktime/schedule'
 require 'dante'
-require 'cli'
+require 'breaktime/cli'
 
 # Handles configuration options, CLI stuff and process daemonizing.
 class Breaktime::Main
@@ -66,7 +66,7 @@ class Breaktime::Main
     # Open a dialog to notify the user about an impending screen break.
     when "dialog"
 			@log.info { "Opening dialog" }
-      require 'dialog'
+      require 'breaktime/dialog'
       # Automatically loads green shoes window
 
     # Run the command that will start the break.

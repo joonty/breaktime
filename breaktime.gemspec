@@ -15,7 +15,6 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($/)
   gem.executables   = ['breaktime']
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.require_paths = ["lib","lib/breaktime"]
   gem.add_dependency 'green_shoes', '~> 1.1.373'
   gem.add_dependency 'trollop', '~> 2.0.0'
   gem.add_dependency 'rufus-scheduler', '~> 2.0.17'

@@ -1,4 +1,4 @@
-require 'linux_win_manager'
+require 'breaktime/linux_win_manager'
 
 # Used to determine and run the screensaver command.
 class Breaktime::Command
