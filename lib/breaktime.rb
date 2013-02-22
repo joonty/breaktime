@@ -5,9 +5,6 @@
 # This should be run as the command line tool `breaktime`. For more information
 # try running `breaktime --help`.
 module Breaktime
-  lib_dir = File.dirname(__FILE__) + File::SEPARATOR + 'breaktime'
-  $:.unshift lib_dir
-
   # Exit status codes.
   EX_OK = 0                # Everything fine
   EX_UNKNOWN = 1           # Unknown exception

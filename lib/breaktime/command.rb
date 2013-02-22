@@ -13,7 +13,6 @@ class Breaktime::Command
   def self.system_default(log)
     case RbConfig::CONFIG['target_os']
     when 'linux'
-      require 'linux_win_manager'
       log.debug { "Using Linux, detecting window manager and appropriate command" }
       Breaktime::LinuxWinManager.detect_command(log)
 
