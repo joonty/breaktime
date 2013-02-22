@@ -80,6 +80,18 @@ class Breaktime::Main
     end
   end
 
+  # Check if Process has the fork method, but also check for Java
+  #
+  # Apparently jRuby doesn't implement this correctly, hence the secondary
+  # check.
+  def fork_implemented?
+    if Process.respond_to?(:fork)
+      RUBY_PLATFORM !~ /java/ && RUBY_ENGINE != 'macruby'
+    else
+      false
+    end
+  end
+
   # Start the scheduler as a daemon.
   #
   # The process can be kept on top if the "daemonize" option is set to be false
@@ -95,7 +107,12 @@ class Breaktime::Main
                   :log_path => @options['log_path']}
 
     if dante_opts[:daemonize]
-      @log.info { "Starting daemon, PID file => #{dante_opts[:pid_path]}, log file => #{dante_opts[:log_path]}" }
+      if not fork_implemented?
+        dante_opts[:daemonize] = false
+        @log.warn { "Daemonizing is not available, as fork is not implemented - running on top" }
+      else
+        @log.info { "Starting daemon, PID file => #{dante_opts[:pid_path]}, log file => #{dante_opts[:log_path]}" }
+      end
     end
 
     schedule = Breaktime::Schedule.new(@options['interval'], @options['days'], @cli.options, @log)
