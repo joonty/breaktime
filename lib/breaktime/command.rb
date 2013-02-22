@@ -20,7 +20,7 @@ class Breaktime::Command
       log.debug { "Using Mac OSX10" }
       'open -a /System/Library/Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app'
 
-    when /mswin.*$/
+    when /(mswin|mingw).*$/
       log.debug { "Using Windows" }
       'rundll32.exe user32.dll,LockWorkStation'
 
