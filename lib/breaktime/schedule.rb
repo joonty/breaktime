@@ -48,11 +48,11 @@ class Breaktime::Schedule
   def run_dialog
     retcode_d = exec_self "dialog", :level => 'error'
 
-    case retcode_d
+    case retcode_d.to_i
     when Breaktime::EX_OK
       @log.info { "Taking a break..." }
       retcode_i = exec_self "now", :level => 'error'
-      if retcode_i == 0
+      if retcode_i.to_i == 0
         @log.info { "Command returned" }
       else
         @log.error { "Failed to run breaktime with the `now` mode" }
