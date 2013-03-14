@@ -81,7 +81,7 @@ class Breaktime::Schedule
     exec_str = "#{$PROGRAM_NAME} #{mode} #{arg_str}"
     @log.debug { "Executing `#{exec_str}`" }
     system exec_str
-    $?.to_i
+    $?.exitstatus
   end
 
 
