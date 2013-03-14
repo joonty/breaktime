@@ -59,7 +59,7 @@ class Breaktime::Schedule
       end
     when Breaktime::EX_BREAK_DELAYED
       @log.info { "Delaying break by 5 minutes" }
-      sleep(10)
+      sleep(300)
       run_dialog
     when Breaktime::EX_BREAK_CANCELLED
       @log.warn { "Cancelled screen break" }
