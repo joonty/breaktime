@@ -17,6 +17,10 @@ module Breaktime
       button "Cancel" do
         exit Breaktime::EX_BREAK_CANCELLED
       end
+      
+      button "Gimme 5" do
+        exit Breaktime::EX_BREAK_DELAYED
+      end
 
       every 1 do |i|
         if i >= seconds

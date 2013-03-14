@@ -57,10 +57,14 @@ class Breaktime::Schedule
       else
         @log.error { "Failed to run breaktime with the `now` mode" }
       end
+    when Breaktime::EX_BREAK_DELAYED
+      @log.info { "Delaying break by 5 minutes" }
+      sleep(10)
+      run_dialog
     when Breaktime::EX_BREAK_CANCELLED
       @log.warn { "Cancelled screen break" }
     else
-      @log.error { "Failed to run breaktime with the `dialog` mode" }
+      @log.error { "Failed to run breaktime with the `dialog` mode: return code #{retcode_d}" }
     end
   end
 

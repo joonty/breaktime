@@ -12,6 +12,7 @@ module Breaktime
   EX_LINUX_WM_UNKNOWN = 3  # Unknown window manager (linux)
   EX_SIGNAL = 128          # Process signal caught
   EX_INTERRUPT = 130       # Control-C caught
+  EX_BREAK_DELAYED = 253   # Delay from the countdown GUI
   EX_BREAK_CANCELLED = 254 # Cancel from the countdown GUI
   EX_CLI = 255             # CLI option errors
 
