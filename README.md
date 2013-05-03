@@ -1,6 +1,6 @@
 # Breaktime
 
-Breaktime loves your eyes. That's why it gives them a screen break every so often - as often as you like. It hides in the background, waiting for it's moment to shine. When it's time for you to take a break it opens a dialog box with a timer counting down from 10, giving you the chance to cancel. But when the timer hits zero your screensaver will pop up, forcing you to go and make some tea/coffee/mojitos.
+Breaktime loves your eyes. That's why it gives them a screen break every so often - as often as you like. It hides in the background, waiting for it's moment to shine. When it's time for you to take a break it opens a dialog box with a timer counting down from 10, giving you the chance to cancel or delay the break by 5 minutes. But when the timer hits zero your screensaver will pop up, forcing you to go and make some tea/coffee/mojitos.
 
 You can set how often it runs, which day(s) of the week it runs, and which system command you want to execute when it's time for a break. All of this can be configured with some lovely YAML.
 
@@ -25,15 +25,28 @@ SYNOPSIS
   breaktime (start|stop|dialog|now) [options]+
 
 DESCRIPTION
-  Give your eyes scheduled screen breaks
+  Give your eyes scheduled screen breaks by starting up the screensaver at
+  regular intervals. By default it will give you a break every 60 minutes.
+  It is configurable via a YAML file which sits at $HOME/.breaktime.yml by
+  default.
+
+USAGE
+  breaktime (start) - start breaktime, as a daemon by default
+  breaktime stop    - stop a daemonized process
+  breaktime now     - run the command to have a break instantly
+  breaktime dialog  - show the countdown dialog box
 
 PARAMETERS
-  --config, -c <s>:   Configuration yaml file (default: /home/jon/.breaktime.yml)
-   --level, -l <s>:   Output level = (debug|info|warn|error|fatal) (default: info)
-        --help, -h:   Show this message
+    --config, -c <s>:   Configuration yaml file (default: /home/jon/.breaktime.yml)
+  --pid-file, -p <s>:   PID file path, used when daemonizing (default: /home/jon/breaktime.pid)
+  --log-file, -l <s>:   Log file path (default: /home/jon/breaktime.log)
+     --level, -o <s>:   Output level = (debug|info|warn|error|fatal) (default: info)
+          --help, -h:   Show this message
 ```
 
 Simply running `breaktime` on its own should work - it will run every 60 minutes by default, and will try and work out the right screensaver command for your OS and window manager. If it can't work out your OS, then you can just set the **command** in the YAML file (read on).
+
+You can set the log and pid file that will be used when daemonizing the process. This will allow you to see what's going on, and will allow only one instance of breaktime to run, respectively.
 
 If you want to do a bit more fine-tuning, create a YAML file at `$HOME/.breaktime.yml` that looks like this (everything's optional):
 
@@ -41,8 +54,6 @@ If you want to do a bit more fine-tuning, create a YAML file at `$HOME/.breaktim
 command: xscreensaver-command -a
 interval: 40
 daemonize: true
-log_file: /path/to/log/file.log
-pid_file: /path/to/pid/file.pid
 days:
   - monday
   - tuesday
@@ -54,8 +65,6 @@ days:
 * **command** is the system command run every break time
 * **interval** is the time, in minutes, between each break
 * **daemonize** says whether the scheduling should run as a background process (daemon)
-* **log_file** specifies the file that output is written to (only if **daemonize** is true)
-* **pid_file** specifies the file that contains the PID (only if **daemonize** is true)
 * **days** allows you to specify which days of the week to run it
 
 If you want your YAML file to be elsewhere, then just pass it as the `--config` parameter to the breaktime command.
