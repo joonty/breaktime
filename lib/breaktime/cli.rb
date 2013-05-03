@@ -8,6 +8,7 @@ class Breaktime::CLI
 
   # Default location of YAML config file.
   HOME = ENV['HOME'] + File::SEPARATOR
+  DEFAULT_CONFIG = HOME + '.breaktime.yml'
 
   def initialize
     @options = parse_cli_options
@@ -43,7 +44,7 @@ BAN
       opt :config,
           "Configuration yaml file",
           :short => '-c',
-          :default => HOME + ".breaktime.yml"
+          :default => DEFAULT_CONFIG
 
       opt :pid_file,
           "PID file path, used when daemonizing",
