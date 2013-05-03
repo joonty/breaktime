@@ -12,8 +12,6 @@ class Breaktime::Main
 
   # Default options that can be overridden in the YAML file.
   DEFAULT_OPTIONS = {'interval' => 60,
-                     'pid_path' => ENV['HOME'] + File::SEPARATOR + "breaktime.pid",
-                     'log_path' => ENV['HOME'] + File::SEPARATOR + "breaktime.log",
                      'daemonize' => true,
                      'days' => ['monday',
                                 'tuesday',
@@ -31,6 +29,9 @@ class Breaktime::Main
     set_log_level @cli.options[:level]
 
     parse_yaml_file
+
+    @options['log_path'] = @cli.options[:log_file]
+    @options['pid_path'] = @cli.options[:pid_file]
   end
 
   # Exit with a trollop message.
@@ -102,8 +103,8 @@ class Breaktime::Main
   #
   # Uses Dante for daemonizing.
   def startd
-    dante_opts = {:daemonize => @options['daemonize'], 
-                  :pid_path => @options['pid_path'], 
+    dante_opts = {:daemonize => @options['daemonize'],
+                  :pid_path => @options['pid_path'],
                   :log_path => @options['log_path']}
 
     if dante_opts[:daemonize]
@@ -133,7 +134,7 @@ class Breaktime::Main
     # Create a new Main object and run the mode given as a CLI parameter.
     #
     # Also rescue exceptions and display helpful messages.
-    # 
+    #
     # TODO: tidy this up
     def start
       main = self.new

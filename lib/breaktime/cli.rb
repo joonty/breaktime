@@ -7,7 +7,7 @@ class Breaktime::CLI
   SUB_COMMANDS = %w(start stop dialog now)
 
   # Default location of YAML config file.
-  DEFAULT_CONFIG = ENV['HOME'] + File::SEPARATOR + ".breaktime.yml"
+  HOME = ENV['HOME'] + File::SEPARATOR
 
   def initialize
     @options = parse_cli_options
@@ -26,8 +26,8 @@ SYNOPSIS
   breaktime (#{SUB_COMMANDS.join("|")}) [options]+
 
 DESCRIPTION
-  Give your eyes scheduled screen breaks by starting up the screensaver at 
-  regular intervals. By default it will give you a break every 60 minutes. 
+  Give your eyes scheduled screen breaks by starting up the screensaver at
+  regular intervals. By default it will give you a break every 60 minutes.
   It is configurable via a YAML file which sits at $HOME/.breaktime.yml by
   default.
 
@@ -40,14 +40,24 @@ USAGE
 PARAMETERS
 BAN
 
-      opt :config, 
-          "Configuration yaml file", 
-          :short => '-c', 
-          :default => DEFAULT_CONFIG
+      opt :config,
+          "Configuration yaml file",
+          :short => '-c',
+          :default => HOME + ".breaktime.yml"
 
-      opt :level, 
-          "Output level = (debug|info|warn|error|fatal)", 
-          :short => '-l', 
+      opt :pid_file,
+          "PID file path, used when daemonizing",
+          :short => '-p',
+          :default => HOME + "breaktime.pid"
+
+      opt :log_file,
+          "Log file path",
+          :short => '-l',
+          :default => HOME + "breaktime.log"
+
+      opt :level,
+          "Output level = (debug|info|warn|error|fatal)",
+          :short => '-o',
           :default => 'info'
 
     end
