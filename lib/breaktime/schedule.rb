@@ -72,12 +72,8 @@ class Breaktime::Schedule
   #
   # The exit code is returned.
   def exec_self(mode, args = {})
-    arg_str = ''
-    @cli_options.merge(args).each do |n,v|
-      if v && !n.to_s.include?("_given")
-        arg_str += " --#{n} #{v}"
-      end
-    end
+    opts = @cli_options.merge(args)
+    arg_str = "--config #{opts[:config]} --level #{opts[:level]}"
     exec_str = "#{$PROGRAM_NAME} #{mode} #{arg_str}"
     @log.debug { "Executing `#{exec_str}`" }
     system exec_str
